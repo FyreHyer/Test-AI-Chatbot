@@ -1,7 +1,0 @@
-langchain
-langchain-ollama
-langchain-chroma
-fastapi
-uvicorn
-jinja2
-python-multipart

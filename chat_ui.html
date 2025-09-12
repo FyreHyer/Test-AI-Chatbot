@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REMABot Chat</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <l        .chat-input {
+            flex: 1;
+          .send-button {
+            padding: 12px 20px;
+            background: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: inherit;
+            letter-spacing: -0.01em;
+            transition: all 0.3s ease;
+            transform: scale(1);
+        }
+
+        .send-button:hover {
+            background: var(--button-hover);
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(79, 70, 229, 0.4);
+        }12px 16px;
+            border: 2px solid var(--input-border);
+            border-radius: 25px;
+            outline: none;
+            font-size: 14px;
+            font-family: var(--font-monospace);
+            font-weight: 400;
+            letter-spacing: -0.01em;
+            transition: all 0.3s ease;
+            background: var(--input-bg);
+            color: var(--input-text);
+        }
+
+        .chat-input:focus {
+            border-color: var(--input-focus-border);
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(79, 70, 229, 0.2);
+        } href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Fira+Code:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'Tiempos Text';
+            src: url('https://fonts.cdnfonts.com/css/tiempos-text') format('woff2');
+            font-weight: 500;
+            font-style: normal;
+        }
+        
+        @font-face {
+            font-family: 'Tiempos Text';
+            src: url('https://fonts.cdnfonts.com/css/tiempos-text') format('woff2');
+            font-weight: 500;
+            font-style: normal;
+        }
+
+        :root {
+            --font-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+            --font-serif: "Tiempos Text", "Times New Roman", Times, Georgia, serif;
+            --font-monospace: "Fira Code", "Fira Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+            --tiempos-text-regular: "Tiempos Text", "Times New Roman", Times, Georgia, serif;
+            --tiempos-text-medium: "Tiempos Text", "Times New Roman", Times, Georgia, serif;
+            --font-user-message: var(--font-sans-serif);
+            --font-claude-response: var(--font-monospace);
+            
+            /* Dark theme colors (default) */
+            --bg-gradient: linear-gradient(135deg, #db8686 0%, #302f31 100%);
+            --container-bg: #262624;
+            --header-bg: #c03232;
+            --header-text: white;
+            --chat-bg: #262624;
+            --user-bubble: #d44040;
+            --user-text: #ffffff;
+            --bot-bubble: #262624;
+            --bot-text: #eeeae4;
+            --input-container-bg: rgb(211, 96, 96);
+            --input-container-border: #ca6868;
+            --input-bg: #3a3a3a;
+            --input-text: #ffffff;
+            --input-border: #262624;
+            --input-focus-border: #e54646;
+            --button-bg: #ffffff;
+            --button-text: rgb(255, 85, 85);
+            --button-hover: #3730a3;
+        }
+
+        /* Light theme colors */
+        [data-theme="light"] {
+            --bg-gradient: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+            --container-bg: #ffffff;
+            --header-bg: #4a90e2;
+            --header-text: white;
+            --chat-bg: #ffffff;
+            --user-bubble: #4a90e2;
+            --user-text: #ffffff;
+            --bot-bubble: #f5f5f5;
+            --bot-text: #333333;
+            --input-container-bg: #f8f9fa;
+            --input-container-border: #dee2e6;
+            --input-bg: #ffffff;
+            --input-text: #333333;
+            --input-border: #ced4da;
+            --input-focus-border: #4a90e2;
+            --button-bg: #4a90e2;
+            --button-text: #ffffff;
+            --button-hover: #357abd;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-monospace);
+            background: var(--bg-gradient);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 400;
+            letter-spacing: -0.01em;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transition: all 0.3s ease;
+        }
+
+        .chat-container {
+            width: 1000px;
+            height: 600px;
+            background: var(--container-bg);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideInUp 0.6s ease-out;
+            transition: all 0.3s ease;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .chat-header {
+            background: var(--header-bg);
+            color: var(--header-text);
+            padding: 20px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 18px;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .chat-header .logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+
+
+        .chat-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: var(--chat-bg);
+            transition: all 0.3s ease;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            opacity: 0;
+            animation: fadeInSlide 0.4s ease-out forwards;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+            animation: fadeInSlideRight 0.4s ease-out forwards;
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+            animation: fadeInSlideLeft 0.4s ease-out forwards;
+        }
+
+        .message-bubble {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            transform: scale(0.8);
+            animation: bubblePop 0.3s ease-out 0.1s forwards;
+            line-height: 1.6;
+            font-weight: 400;
+            letter-spacing: -0.01em;
+        }
+
+        .message.user .message-bubble {
+            background: var(--user-bubble);
+            color: var(--user-text);
+            font-weight: 500;
+            font-family: var(--font-user-message);
+        }
+
+        .message.bot .message-bubble {
+            background: var(--bot-bubble);
+            color: var(--bot-text);
+            font-family: var(--font-claude-response);
+            font-weight: 500;
+        }
+
+        /* Formatting for organized text */
+        .message-bubble ol {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .message-bubble ul {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .message-bubble li {
+            margin: 4px 0;
+        }
+
+        .message-bubble p {
+            margin: 8px 0;
+        }
+
+        .message-bubble .section {
+            margin-bottom: 10px;
+        }
+
+        .message-bubble strong {
+            font-weight: 600;
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            background: var(--input-container-bg);
+            border-top: 1px solid var(--input-container-border);
+            transition: all 0.3s ease;
+        }
+
+        .chat-input-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #262624;
+            border-radius: 25px;
+            outline: none;
+            font-size: 14px;
+            font-family: var(--font-monospace);
+            font-weight: 400;
+            letter-spacing: -0.01em;
+            transition: all 0.3s ease;
+            background: #262624;
+            color: #ffffff;
+        }
+
+        .chat-input:focus {
+            border-color: #e54646;
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(79, 70, 229, 0.2);
+        }
+
+        .chat-input:disabled {
+            background: #2a2a2a;
+            color: #888888;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 8px 12px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .send-button {
+            padding: 12px 20px;
+            background: #b83030;
+            color: rgb(255, 255, 255);
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: inherit;
+            letter-spacing: -0.01em;
+            transition: all 0.3s ease;
+            transform: scale(1);
+        }
+
+        .send-button:hover {
+            background: #da5d5d;
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(243, 243, 253, 0.4);
+        }
+
+        .send-button:active {
+            transform: scale(0.95);
+        }
+
+        .send-button:disabled {
+            background: #ffffff;
+            cursor: not-allowed;
+            transform: scale(1);
+            box-shadow: none;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 12px 16px;
+            background: #262624;
+            border-radius: 18px;
+            color: #45484d;
+            font-style: italic;
+            max-width: 80%;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .typing-dots {
+            display: inline-block;
+        }
+
+        .typing-dots::after {
+            content: '';
+            animation: typingDots 1.5s infinite;
+        }
+
+        /* Keyframe animations */
+        @keyframes fadeInSlideLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInSlideRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes bubblePop {
+            from {
+                transform: scale(0.8);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.6;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes typingDots {
+            0% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+            100% { content: ''; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <img src="/static/Logo_ROHM.png" alt="REMABot Logo" class="logo">
+            <span>REMABot - IT Support Assistant</span>
+            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+                🌙 Dark
+            </button>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">
+                <div class="message-bubble">
+                    Hello! I'm REMABot, your IT support assistant. How can I help you today?
+                </div>
+            </div>
+            <div class="message bot typing-indicator" id="typingIndicator">
+                <div class="message-bubble">
+                    REMABot is typing<span class="typing-dots"></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-input-container">
+            <form class="chat-input-form" id="chatForm">
+                <input 
+                    type="text" 
+                    class="chat-input" 
+                    id="chatInput" 
+                    placeholder="Type your message here..."
+                    autocomplete="off"
+                >
+                <button type="submit" class="send-button" id="sendButton">
+                    Send
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Get DOM elements
+        const chatMessages = document.getElementById('chatMessages');
+        const chatForm = document.getElementById('chatForm');
+        const chatInput = document.getElementById('chatInput');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const themeToggle = document.getElementById('themeToggle');
+
+        // Theme toggle functionality
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            
+            // Update button text and icon
+            if (newTheme === 'light') {
+                themeToggle.innerHTML = '☀️ Light';
+            } else {
+                themeToggle.innerHTML = '🌙 Dark';
+            }
+            
+            // Save preference to localStorage
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Load saved theme preference
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            
+            if (savedTheme === 'light') {
+                themeToggle.innerHTML = '☀️ Light';
+            } else {
+                themeToggle.innerHTML = '🌙 Dark';
+            }
+        }
+
+        // Show typing indicator
+        function showTyping() {
+            typingIndicator.style.display = 'flex';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Hide typing indicator
+        function hideTyping() {
+            typingIndicator.style.display = 'none';
+        }
+
+        // Format text for better readability
+        function formatText(text) {
+            // Split by numbered points (1. 2. 3. etc.)
+            let formatted = text.replace(/(\d+\.\s)/g, '<br><strong>$1</strong>');
+            
+            // Add line breaks for better paragraph separation
+            formatted = formatted.replace(/\. ([A-Z])/g, '.<br><br>$1');
+            
+            // Format common patterns
+            formatted = formatted.replace(/Here are a few steps you can try:/gi, '<strong>Here are a few steps you can try:</strong><br>');
+            formatted = formatted.replace(/If none of these steps/gi, '<br><strong>If none of these steps</strong>');
+            formatted = formatted.replace(/Good luck!/gi, '<br><br><strong>Good luck!</strong>');
+            
+            return formatted;
+        }
+
+        // Add message to chat with animation delay
+        function addMessage(text, isUser, delay = 0) {
+            setTimeout(() => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+                
+                const bubbleDiv = document.createElement('div');
+                bubbleDiv.className = 'message-bubble';
+                
+                if (isUser) {
+                    // User messages stay as plain text
+                    bubbleDiv.textContent = text;
+                } else {
+                    // Bot messages get formatted
+                    bubbleDiv.innerHTML = formatText(text);
+                }
+                
+                messageDiv.appendChild(bubbleDiv);
+                
+                // Insert before typing indicator
+                chatMessages.insertBefore(messageDiv, typingIndicator);
+                
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, delay);
+        }
+
+        // Send message to API
+        async function sendMessage(message) {
+            try {
+                // Use current host and port for API calls (works locally and over network)
+                const apiUrl = `${window.location.protocol}//${window.location.host}/chat`;
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question: message })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                return data.response;
+            } catch (error) {
+                console.error('Error:', error);
+                return 'Sorry, I encountered an error. Please try again.';
+            }
+        }
+
+        // Shake animation for input on error
+        function shakeInput() {
+            chatInput.style.animation = 'shake 0.5s ease-in-out';
+            setTimeout(() => {
+                chatInput.style.animation = '';
+            }, 500);
+        }
+
+        // Handle form submission with enhanced animations
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const message = chatInput.value.trim();
+            if (!message) {
+                shakeInput();
+                return;
+            }
+
+            // Disable input and button to prevent multiple submissions
+            chatInput.disabled = true;
+            sendButton.disabled = true;
+            sendButton.textContent = 'Sending...';
+            sendButton.style.transform = 'scale(0.95)';
+
+            // Add user message immediately
+            addMessage(message, true);
+            
+            // Clear input
+            chatInput.value = '';
+
+            // Show typing indicator after a short delay
+            setTimeout(() => {
+                showTyping();
+            }, 500);
+
+            try {
+                // Get bot response
+                const response = await sendMessage(message);
+                
+                // Hide typing indicator
+                hideTyping();
+                
+                // Add bot response with slight delay for realism
+                setTimeout(() => {
+                    addMessage(response, false);
+                    
+                    // Re-enable input and button only after response is complete
+                    chatInput.disabled = false;
+                    sendButton.disabled = false;
+                    sendButton.textContent = 'Send';
+                    sendButton.style.transform = 'scale(1)';
+                    
+                    // Focus input
+                    chatInput.focus();
+                }, 300);
+                
+            } catch (error) {
+                hideTyping();
+                addMessage('Sorry, I encountered an error. Please try again.', false);
+                
+                // Re-enable on error
+                chatInput.disabled = false;
+                sendButton.disabled = false;
+                sendButton.textContent = 'Send';
+                sendButton.style.transform = 'scale(1)';
+                chatInput.focus();
+            }
+        });
+
+        // Enhanced input animations
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey && !chatInput.disabled) {
+                e.preventDefault();
+                chatForm.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // Focus input on load with slight delay
+        setTimeout(() => {
+            chatInput.focus();
+        }, 600);
+
+        // Load theme preference on page load
+        loadTheme();
+
+        // Hide typing indicator initially
+        hideTyping();
+    </script>
+</body>
+</html>

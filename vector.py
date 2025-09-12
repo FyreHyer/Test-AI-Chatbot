@@ -10,7 +10,6 @@ persist_directory = "chroma_db"
 embeddings = OllamaEmbeddings(
     model="nomic-embed-text"
 )
-
 # Only rebuild vector store if it doesn't already exist
 if os.path.exists(persist_directory) and os.listdir(persist_directory):
     print("Loading existing vector store...")
@@ -26,10 +25,10 @@ else:
     print(f"Loaded {len(documents)} pages from PDF")
 
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1500,
-        chunk_overlap=300,
+        chunk_size=1000,
+        chunk_overlap=200,
         separators=[
-            "\n## ", "\n### ", "\nProblem:", "\nSolution:", "\nSymptoms:", "\nCause:", "\nStep ", "\n\n", "\n", ". ", " ", ""
+            "\nProblem:", "\nSolution:", "\nSymptoms:", "\nStep ", "\n\n", "\n", ". ", " ", ""
         ],
         length_function=len,
     )
@@ -45,4 +44,7 @@ else:
     print(f"Vector store saved to: {persist_directory}")
 
 
-retriever = vectorstore.as_retriever(k=3)
+retriever = vectorstore.as_retriever(
+    search_type="similarity",
+    search_kwargs={"k": 5}
+)
